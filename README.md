@@ -37,6 +37,18 @@ See `exe/ExampleMain.hs` for an example on how to integrate Duckling in your
 project.
 If your backend doesn't run Haskell or if you don't want to spin your own Duckling server, you can directly use [wit.ai](https://wit.ai)'s built-in entities.
 
+## Building and publishing as a docker image
+The only difference with the upstream Facebook repository is that the docker image is optimised to be as small as possible.
+
+To build it, run `./build.sh`. The docker image tag will be printed out on success.
+It uses the commit sha1 for uniqueness.
+
+If you also want to publish the image to docker hub, you need to be logged into it.
+Run `docker login` and provide your username and password.
+If you don't have an account, create one and ask Ops for permissions on the bespokeinc organisation.
+
+Once that's done, simply add the `-p` option to the build script: `./build.sh -p`
+
 ## Supported dimensions
 Duckling supports many languages, but most don't support all dimensions yet
 (**we need your help!**).
