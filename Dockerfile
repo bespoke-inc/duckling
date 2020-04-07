@@ -1,22 +1,23 @@
-FROM haskell:8
-
-RUN git clone https://github.com/facebook/duckling.git
-
-RUN mkdir /log
-
-WORKDIR /duckling
-
-RUN apt-get update
-
-RUN apt-get install -qq -y libpcre3 libpcre3-dev build-essential --fix-missing --no-install-recommends
+FROM fpco/stack-build:lts-9.10 as build
 
 ENV LANG=C.UTF-8
 
-RUN stack setup
-# NOTE:`stack build` will use as many cores as are available to build
-# in parallel. However, this can cause OOM issues as the linking step
-# in GHC can be expensive. If the build fails, try specifying the
-# '-j1' flag to force the build to run sequentially.
-RUN stack build
+WORKDIR /build
 
-ENTRYPOINT stack exec duckling-example-exe
+COPY . .
+
+RUN stack build --system-ghc
+
+FROM debian:buster-slim
+
+WORKDIR /app
+
+COPY --from=build /build/.stack-work/install/x86_64-linux/lts-9.10/8.0.2/bin /usr/local/bin
+
+ENV LANG=C.UTF-8
+
+RUN mkdir /app/log && \
+    ln -sf /dev/stdout /app/log/access.log && \
+    ln -sf /dev/stderr /app/log/error.log
+
+CMD /usr/local/bin/duckling-example-exe
